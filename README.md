@@ -4,8 +4,8 @@
 
 | Field     | Value               |
 |-----------|---------------------|
-| **Name**  | _John Doe_          |
-| **Group** | _CS-101_            |
+| **Name**  | Курбанмагомедов Магомед        |
+| **Group** | РПИС 1            |
 
 > **Replace the data above with your own!**
 
