@@ -29,21 +29,10 @@ public:
         delete ptr_;
     }
 
-    T& operator*() const {
-        return *ptr_;
-    }
-
-    T* operator->() const {
-        return ptr_;
-    }
-
-    T* get() const {
-        return ptr_;
-    }
-
-    explicit operator bool() const {
-        return ptr_ != nullptr;
-    }
+    T& operator*() const { return *ptr_; }
+    T* operator->() const { return ptr_; }
+    T* get() const { return ptr_; }
+    explicit operator bool() const { return ptr_ != nullptr; }
 
     T* release() {
         T* temp = ptr_;
