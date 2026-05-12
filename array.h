@@ -7,49 +7,49 @@ class Array {
 public:
     // ======================== Constructors ========================
 
-    Array() : arr_(nullptr), sz_(0) {}
+    Array() : m_data(nullptr), m_size(0) {}
 
-    explicit Array(size_t size) : arr_(size > 0 ? new T[size]() : nullptr), sz_(size) {}
+    explicit Array(size_t size) : m_data(size > 0 ? new T[size]() : nullptr), m_size(size) {}
 
-    Array(size_t size, const T& value) : arr_(size > 0 ? new T[size] : nullptr), sz_(size) {
-        for (size_t i = 0; i < sz_; ++i) {
-            arr_[i] = value;
+    Array(size_t size, const T& value) : m_data(size > 0 ? new T[size] : nullptr), m_size(size) {
+        for (size_t i = 0; i < m_size; ++i) {
+            m_data[i] = value;
         }
     }
 
     // =================== Copy and Move ===========================
 
-    Array(const Array& other) : sz_(other.sz_), arr_(sz_ > 0 ? new T[sz_] : nullptr) {
-        for (size_t i = 0; i < sz_; ++i) {
-            arr_[i] = other.arr_[i];
+    Array(const Array& other) : m_data(other.m_size > 0 ? new T[other.m_size] : nullptr), m_size(other.m_size) {
+        for (size_t i = 0; i < m_size; ++i) {
+            m_data[i] = other.m_data[i];
         }
     }
 
-    Array(Array&& other) noexcept : arr_(other.arr_), sz_(other.sz_) {
-        other.arr_ = nullptr;
-        other.sz_ = 0;
+    Array(Array&& other) noexcept : m_data(other.m_data), m_size(other.m_size) {
+        other.m_data = nullptr;
+        other.m_size = 0;
     }
 
     Array& operator=(const Array& other) {
         if (this != &other) {
-            T* new_arr = other.sz_ > 0 ? new T[other.sz_] : nullptr;
-            for (size_t i = 0; i < other.sz_; ++i) {
-                new_arr[i] = other.arr_[i];
+            T* new_data = other.m_size > 0 ? new T[other.m_size] : nullptr;
+            for (size_t i = 0; i < other.m_size; ++i) {
+                new_data[i] = other.m_data[i];
             }
-            delete[] arr_;
-            arr_ = new_arr;
-            sz_ = other.sz_;
+            delete[] m_data;
+            m_data = new_data;
+            m_size = other.m_size;
         }
         return *this;
     }
 
     Array& operator=(Array&& other) noexcept {
         if (this != &other) {
-            delete[] arr_;
-            arr_ = other.arr_;
-            sz_ = other.sz_;
-            other.arr_ = nullptr;
-            other.sz_ = 0;
+            delete[] m_data;
+            m_data = other.m_data;
+            m_size = other.m_size;
+            other.m_data = nullptr;
+            other.m_size = 0;
         }
         return *this;
     }
@@ -57,78 +57,78 @@ public:
     // =================== Destructor ==============================
 
     ~Array() {
-        delete[] arr_;
+        delete[] m_data;
     }
 
     // =================== Element access ==========================
 
     T& operator[](size_t index) {
-        return arr_[index];
+        return m_data[index];
     }
 
     const T& operator[](size_t index) const {
-        return arr_[index];
+        return m_data[index];
     }
 
     T& front() {
-        return arr_[0];
+        return m_data[0];
     }
 
     const T& front() const {
-        return arr_[0];
+        return m_data[0];
     }
 
     T& back() {
-        return arr_[sz_ - 1];
+        return m_data[m_size - 1];
     }
 
     const T& back() const {
-        return arr_[sz_ - 1];
+        return m_data[m_size - 1];
     }
 
     T* data() {
-        return arr_;
+        return m_data;
     }
 
     const T* data() const {
-        return arr_;
+        return m_data;
     }
 
     // =================== Capacity ================================
 
     size_t size() const {
-        return sz_;
+        return m_size;
     }
 
     bool empty() const {
-        return sz_ == 0;
+        return m_size == 0;
     }
 
     // =================== Operations ==============================
 
     void fill(const T& value) {
-        for (size_t i = 0; i < sz_; ++i) {
-            arr_[i] = value;
+        for (size_t i = 0; i < m_size; ++i) {
+            m_data[i] = value;
         }
     }
 
     void swap(Array& other) noexcept {
-        T* tmp_arr = arr_;
-        size_t tmp_sz = sz_;
+        T* tmp_data = m_data;
+        size_t tmp_size = m_size;
         
-        arr_ = other.arr_;
-        sz_ = other.sz_;
+        m_data = other.m_data;
+        m_size = other.m_size;
         
-        other.arr_ = tmp_arr;
-        other.sz_ = tmp_sz;
+        other.m_data = tmp_data;
+        other.m_size = tmp_size;
     }
 
     // =================== Comparison ==============================
 
     bool operator==(const Array& rhs) const {
-        if (sz_ != rhs.sz_) return false;
-        for (size_t i = 0; i < sz_; ++i) {
-            if (arr_[i] != rhs.arr_[i]) return false;
+        if (m_size != rhs.m_size) return false;
+        for (size_t i = 0; i < m_size; ++i) {
+            if (m_data[i] != rhs.m_data[i]) return false;
         }
         return true;
     }
@@ -138,6 +138,6 @@ public:
     }
 
 private:
-    T* arr_ = nullptr;
-    size_t sz_ = 0;
+    T* m_data = nullptr;
+    size_t m_size = 0;
 };
