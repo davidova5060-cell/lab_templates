@@ -1,115 +1,153 @@
 #pragma once
 
-#include <cstddef>
-#include <memory>
 #include <utility>
 
-template <typename T, typename Deleter = std::default_delete<T>>
+template <typename T>
 class UniquePtr {
 public:
-    // ======================== Constructors ========================
+    // ==================== Constructors ====================
 
-    UniquePtr();
-    explicit UniquePtr(T* ptr);
-    UniquePtr(T* ptr, const Deleter& deleter);
-    UniquePtr(T* ptr, Deleter&& deleter);
+    UniquePtr() : ptr_(nullptr) {}
 
-    // =================== No copy ==================================
+    explicit UniquePtr(T* ptr) : ptr_(ptr) {}
 
-    UniquePtr(const UniquePtr&)            = delete;
+    UniquePtr(std::nullptr_t) : ptr_(nullptr) {}
+
+    // ================= Copy is deleted ===================
+
+    UniquePtr(const UniquePtr&) = delete;
     UniquePtr& operator=(const UniquePtr&) = delete;
 
-    // =================== Move ====================================
+    // ================= Move ===================
 
-    UniquePtr(UniquePtr&& other);
-    UniquePtr& operator=(UniquePtr&& other);
+    UniquePtr(UniquePtr&& other) noexcept : ptr_(other.ptr_) {
+        other.ptr_ = nullptr;
+    }
 
-    // =================== Destructor ==============================
+    UniquePtr& operator=(UniquePtr&& other) noexcept {
+        if (this != &other) {
+            delete ptr_;
+            ptr_ = other.ptr_;
+            other.ptr_ = nullptr;
+        }
+        return *this;
+    }
 
-    ~UniquePtr();
+    // ================= Destructor ===================
 
-    // =================== Observers ===============================
+    ~UniquePtr() {
+        delete ptr_;
+    }
 
-    T*       get();
-    const T* get() const;
+    // ================= Observers ===================
 
-    explicit operator bool() const;
+    T& operator*() const {
+        return *ptr_;
+    }
 
-    T&       operator*();
-    const T& operator*() const;
+    T* operator->() const {
+        return ptr_;
+    }
 
-    T*       operator->();
-    const T* operator->() const;
+    T* get() const {
+        return ptr_;
+    }
 
-    Deleter&       get_deleter();
-    const Deleter& get_deleter() const;
+    explicit operator bool() const {
+        return ptr_ != nullptr;
+    }
 
-    // =================== Modifiers ===============================
+    // ================= Modifiers ===================
 
-    T*   release();
-    void reset(T* ptr = nullptr);
-    void swap(UniquePtr& other);
+    T* release() {
+        T* temp = ptr_;
+        ptr_ = nullptr;
+        return temp;
+    }
+
+    void reset(T* new_ptr = nullptr) {
+        delete ptr_;
+        ptr_ = new_ptr;
+    }
+
+    void swap(UniquePtr& other) noexcept {
+        std::swap(ptr_, other.ptr_);
+    }
 
 private:
-    T*      ptr_ = nullptr;
-    Deleter deleter_;
+    T* ptr_;
 };
 
-// =====================================================================
-//  Partial specialization for arrays: UniquePtr<T[]>
-//  Uses operator[] instead of operator*/operator->.
-//  Default deleter is std::default_delete<T[]> (calls delete[]).
-// =====================================================================
+// ==================== Specialization for arrays ====================
 
-template <typename T, typename Deleter>
-class UniquePtr<T[], Deleter> {
+template <typename T>
+class UniquePtr<T[]> {
 public:
-    // ======================== Constructors ========================
+    // ==================== Constructors ====================
 
-    UniquePtr();
-    explicit UniquePtr(T* ptr);
-    UniquePtr(T* ptr, const Deleter& deleter);
-    UniquePtr(T* ptr, Deleter&& deleter);
+    UniquePtr() : ptr_(nullptr) {}
 
-    // =================== No copy ==================================
+    explicit UniquePtr(T* ptr) : ptr_(ptr) {}
 
-    UniquePtr(const UniquePtr&)            = delete;
+    UniquePtr(std::nullptr_t) : ptr_(nullptr) {}
+
+    // ================= Copy is deleted ===================
+
+    UniquePtr(const UniquePtr&) = delete;
     UniquePtr& operator=(const UniquePtr&) = delete;
 
-    // =================== Move ====================================
+    // ================= Move ===================
 
-    UniquePtr(UniquePtr&& other);
-    UniquePtr& operator=(UniquePtr&& other);
+    UniquePtr(UniquePtr&& other) noexcept : ptr_(other.ptr_) {
+        other.ptr_ = nullptr;
+    }
 
-    // =================== Destructor ==============================
+    UniquePtr& operator=(UniquePtr&& other) noexcept {
+        if (this != &other) {
+            delete[] ptr_;
+            ptr_ = other.ptr_;
+            other.ptr_ = nullptr;
+        }
+        return *this;
+    }
 
-    ~UniquePtr();
+    // ================= Destructor ===================
 
-    // =================== Observers ===============================
+    ~UniquePtr() {
+        delete[] ptr_;
+    }
 
-    T*       get();
-    const T* get() const;
+    // ================= Observers ===================
 
-    explicit operator bool() const;
+    T& operator[](size_t index) const {
+        return ptr_[index];
+    }
 
-    T&       operator[](size_t index);
-    const T& operator[](size_t index) const;
+    T* get() const {
+        return ptr_;
+    }
 
-    Deleter&       get_deleter();
-    const Deleter& get_deleter() const;
+    explicit operator bool() const {
+        return ptr_ != nullptr;
+    }
 
-    // =================== Modifiers ===============================
+    // ================= Modifiers ===================
 
-    T*   release();
-    void reset(T* ptr = nullptr);
-    void swap(UniquePtr& other);
+    T* release() {
+        T* temp = ptr_;
+        ptr_ = nullptr;
+        return temp;
+    }
+
+    void reset(T* new_ptr = nullptr) {
+        delete[] ptr_;
+        ptr_ = new_ptr;
+    }
+
+    void swap(UniquePtr& other) noexcept {
+        std::swap(ptr_, other.ptr_);
+    }
 
 private:
-    T*      ptr_ = nullptr;
-    Deleter deleter_;
+    T* ptr_;
 };
-
-// =================== Free function ===============================
-
-template <typename T, typename... Args>
-UniquePtr<T> make_unique(Args&&... args);
